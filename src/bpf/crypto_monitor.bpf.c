@@ -206,10 +206,11 @@ int handle_sched_switch(struct trace_event_raw_sched_switch *ctx) {
     // 计算调度延迟 
     wake_start = bpf_map_lookup_elem(&wakeup_ts, &next_pid);
     if (wake_start && next_metrics && now > *wake_start) {
-      delta = now - *wake_start; // 这就是关键的 Scheduling Latency
-      next_metrics->sched_latency_samples++;
-      next_metrics->sched_latency_total_ns += delta;
-      if (delta > next_metrics->sched_latency_max_ns) {
+      delta = now - *wake_start; 
+      next_metrics->sched_latency_samples++;  // 统计被唤醒后成功调度的次数
+      next_metrics->sched_latency_total_ns += delta;  // 累积调度延迟时间
+      if (delta > next_metrics->sched_latency_max_ns) // 更新最大调度延迟
+      {
         next_metrics->sched_latency_max_ns = delta;
       }
       bump_histogram(delta); // 计入直方图分布
@@ -227,24 +228,27 @@ int handle_sched_switch(struct trace_event_raw_sched_switch *ctx) {
 
 // 探针：进入加密函数
 SEC("uprobe/crypto_enter")
-int BPF_KPROBE(handle_crypto_enter) {
-  __u64 id = bpf_get_current_pid_tgid();
-  __u32 tgid = id >> 32;
+int BPF_KPROBE(handle_crypto_enter) 
+{
+  __u64 id = bpf_get_current_pid_tgid();  
+  __u32 tgid = id >> 32;  
   __u32 tid = (__u32)id;
   __u64 now = bpf_ktime_get_ns();
   struct thread_metrics *metric;
-  __u8 tracked = 1;
+  __u8 tracked = 1; // 只要调用过加密函数一次，就把这个线程加入监控名单，不再区分它后续是否还调用加密函数了
 
-  if (!match_target(tgid, tid)) {
+  if (!match_target(tgid, tid)) //进行过滤
+  {
     return 0;
   }
 
-  metric = get_or_init_metrics(tid);
-  if (!metric) {
+  metric = get_or_init_metrics(tid);//初始化
+  if (!metric) 
+  {
     return 0;
   }
 
-  metric->crypto_calls++;
+  metric->crypto_calls++;//调用次数加1
   bpf_get_current_comm(metric->comm, sizeof(metric->comm));
   
   // 核心逻辑：一旦该线程碰了加密接口，就把它加入调度器监控名单，
@@ -258,7 +262,8 @@ int BPF_KPROBE(handle_crypto_enter) {
 
 // 探针：退出加密函数
 SEC("uretprobe/crypto_exit")
-int BPF_KRETPROBE(handle_crypto_exit, int ret) {
+int BPF_KRETPROBE(handle_crypto_exit, int ret) 
+{
   __u64 id = bpf_get_current_pid_tgid();
   __u32 tgid = id >> 32;
   __u32 tid = (__u32)id;
@@ -266,18 +271,21 @@ int BPF_KRETPROBE(handle_crypto_exit, int ret) {
   __u64 *start_ts;
   struct thread_metrics *metric;
 
-  if (!match_target(tgid, tid)) {
+  if (!match_target(tgid, tid))
+  {
     return 0;
   }
 
   metric = get_or_init_metrics(tid);
-  if (!metric) {
+  if (!metric) 
+  {
     return 0;
   }
 
   // 假设根据目标函数的规约，返回值 < 0 为失败状态
-  if (ret < 0) {
-    metric->crypto_errors++;
+  if (ret < 0) 
+  {
+    metric->crypto_errors++;  //错误次数加1
   }
 
   // 计算此次加密调用的耗时
