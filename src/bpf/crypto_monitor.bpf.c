@@ -5,18 +5,12 @@
 #include <bpf/bpf_core_read.h>
 #include "../common.h"
 
-char LICENSE[] SEC("license") = "GPL";
+char LICENSE[] SEC("license") = "Dual/GPL";//许可证
 
 // 全局过滤配置，由用户态加载器在挂载 eBPF 程序前动态写入
-// 如果保持为 0，则代表不进行过滤（监控全系统）
-const volatile __u32 target_tgid = 0; // 目标进程组 ID (通常等于主进程 PID)
+// 如果保持为 0，则代表不进行过滤
+const volatile __u32 target_tgid = 0; // 目标进程组 ID 
 const volatile __u32 target_tid = 0;  // 目标线程 ID
-
-/* ========================================================
- * BPF MAP 存储区定义
- * 这里大量使用了 BPF_MAP_TYPE_LRU_HASH (最近最少使用哈希表)，
- * 相比普通 HASH，LRU 可以在满载时自动淘汰旧数据，防止内核内存溢出。
- * ======================================================== */
 
 // 记录线程被唤醒 (加入运行队列) 的时间戳
 struct {
@@ -44,7 +38,6 @@ struct {
 
 // 黑名单/白名单过滤：记录哪些线程真正调用过加密函数。
 // 作用：内核调度器 tracepoint 是全系统触发的，开销极大。
-// 我们借此实现动态过滤，只计算那些涉足加密业务的线程的调度延迟。
 struct {
   __uint(type, BPF_MAP_TYPE_LRU_HASH);
   __uint(max_entries, 4096);
@@ -57,21 +50,20 @@ struct {
   __uint(type, BPF_MAP_TYPE_LRU_HASH);
   __uint(max_entries, 4096);
   __type(key, __u32);
-  __type(value, struct thread_metrics); // thread_metrics 定义在 common.h 中
+  __type(value, struct thread_metrics); 
 } metrics SEC(".maps");
 
 // 调度延迟的对数直方图 (使用 ARRAY 提高读取性能)
 struct {
   __uint(type, BPF_MAP_TYPE_ARRAY);
-  __uint(max_entries, HIST_SLOTS); // HIST_SLOTS 定义在 common.h 中，通常为 64
+  __uint(max_entries, HIST_SLOTS); 
   __type(key, __u32);
   __type(value, __u64);
 } sched_latency_hist SEC(".maps");
 
 
-/* ========================================================
- * 辅助函数 (Helper Functions)
- * ======================================================== */
+
+ //辅助函数 (Helper Functions)
 
 // 严格匹配：检查当前 TGID 和 TID 是否匹配用户配置的目标
 static __always_inline bool match_target(__u32 tgid, __u32 tid) {
@@ -149,9 +141,7 @@ static __always_inline int handle_sched_wakeup_event(__u32 pid) {
 }
 
 
-/* ========================================================
- * 探针定义：内核调度器追踪 (Tracepoints)
- * ======================================================== */
+/*  探针定义：内核调度器追踪 (Tracepoints) */
 
 // 探针：线程被唤醒，准备加入 CPU 运行队列（Runqueue）
 SEC("tracepoint/sched/sched_wakeup")
