@@ -95,15 +95,15 @@ static __always_inline bool match_sched_target(__u32 tid) {
 // 获取或初始化指标结构体
 static __always_inline struct thread_metrics *get_or_init_metrics(__u32 tid) {
   struct thread_metrics zero = {};
-  struct thread_metrics *value;
+  struct thread_metrics *value; //声明一个指针用于接收从map中查到的地址
 
-  value = bpf_map_lookup_elem(&metrics, &tid);
+  value = bpf_map_lookup_elem(&metrics, &tid); //在metrics表中查找当前线程的指标结构体地址
   if (value) {
     return value;
-  }
+  }//查到了就直接返回指针地址
 
-  bpf_map_update_elem(&metrics, &tid, &zero, BPF_ANY);
-  return bpf_map_lookup_elem(&metrics, &tid);
+  bpf_map_update_elem(&metrics, &tid, &zero, BPF_ANY); //没有查到就先插入一个全0的结构体占位
+  return bpf_map_lookup_elem(&metrics, &tid);//返回这个新插入的结构体地址。
 }
 
 // 直方图插槽计算及累加
@@ -171,15 +171,16 @@ int handle_sched_switch(struct trace_event_raw_sched_switch *ctx) {
   if (match_sched_target(prev_pid)) {
     prev_metrics = get_or_init_metrics(prev_pid);
     if (prev_metrics) {
-      prev_metrics->context_switches++;
+      prev_metrics->context_switches++; 
       // ctx->prev_state 为 0 (TASK_RUNNING) 说明它是被时间片耗尽或高优先级任务强行抢占的 -> 非自愿切换
       // 不为 0 说明它自己主动休眠了 (如等锁、I/O、usleep) -> 自愿切换
-      if (ctx->prev_state == 0) {
+      if (ctx->prev_state == 0) 
+      {
         prev_metrics->involuntary_switches++;
       } else {
         prev_metrics->voluntary_switches++;
       }
-      bpf_get_current_comm(prev_metrics->comm, sizeof(prev_metrics->comm)); // 顺便更新进程名
+      bpf_get_current_comm(prev_metrics->comm, sizeof(prev_metrics->comm)); // 更新进程名
     }
 
     // 计算本次该线程在 CPU 上到底跑了多久 (实际 CPU 耗时)
@@ -202,7 +203,7 @@ int handle_sched_switch(struct trace_event_raw_sched_switch *ctx) {
     // 记录拿到 CPU 开始运行的时间戳
     bpf_map_update_elem(&running_ts, &next_pid, &now, BPF_ANY);
     
-    // 计算调度延迟 (拿到 CPU 的时间 - 刚被唤醒的时间)
+    // 计算调度延迟 
     wake_start = bpf_map_lookup_elem(&wakeup_ts, &next_pid);
     if (wake_start && next_metrics && now > *wake_start) {
       delta = now - *wake_start; // 这就是关键的 Scheduling Latency
@@ -220,10 +221,9 @@ int handle_sched_switch(struct trace_event_raw_sched_switch *ctx) {
 }
 
 
-/* ========================================================
- * 探针定义：应用层加密库追踪 (Uprobes)
- * （利用 BPF_KPROBE 宏包装，其实际挂载点由用户态程序指定为 uprobe）
- * ======================================================== */
+/*
+ 探针定义：应用层加密库追踪 (Uprobes)
+ （利用 BPF_KPROBE 宏包装，其实际挂载点由用户态程序指定为 uprobe）*/
 
 // 探针：进入加密函数
 SEC("uprobe/crypto_enter")
