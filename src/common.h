@@ -1,7 +1,9 @@
 #ifndef CRYPTO_MONITOR_COMMON_H
 #define CRYPTO_MONITOR_COMMON_H
 
-#include <linux/types.h>
+#ifndef __VMLINUX_H__
+#include <linux/types.h> //不加条件判断会冲突
+#endif
 
 #define TASK_COMM_LEN 16  //进程名长度
 #define HIST_SLOTS 64     //对数直方图槽位数量
