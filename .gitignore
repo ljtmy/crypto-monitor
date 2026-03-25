@@ -1,0 +1,8 @@
+build/
+dist/
+*.o
+*.skel.h
+*.csv
+*.json
+src/bpf/vmlinux.h
+
