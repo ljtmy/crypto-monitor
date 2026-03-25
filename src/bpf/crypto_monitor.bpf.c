@@ -145,13 +145,14 @@ static __always_inline int handle_sched_wakeup_event(__u32 pid) {
 
 // 探针：线程被唤醒，准备加入 CPU 运行队列（Runqueue）
 SEC("tracepoint/sched/sched_wakeup")
-int handle_sched_wakeup(struct trace_event_raw_sched_wakeup *ctx) {
+int handle_sched_wakeup(struct trace_event_raw_sched_wakeup_template *ctx) //参数不正确报错
+{
   return handle_sched_wakeup_event(ctx->pid);
 }
 
 // 探针：新创建的线程首次被唤醒
 SEC("tracepoint/sched/sched_wakeup_new")
-int handle_sched_wakeup_new(struct trace_event_raw_sched_wakeup *ctx) {
+int handle_sched_wakeup_new(struct trace_event_raw_sched_wakeup_template *ctx) {
   return handle_sched_wakeup_event(ctx->pid);
 }
 
