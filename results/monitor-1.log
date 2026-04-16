@@ -1,0 +1,9 @@
+Tracing pid=-1 tid=-1 symbol=EVP_CipherUpdate from /usr/lib/x86_64-linux-gnu/libcrypto.so.3 every 2s
+[2026-04-16 03:28:04] calls/s=0 switches/s=301 cpu=179.34% avg_sched=98.82us p50=4.10us p95=131.07us max=5219.33us errors=0
+[2026-04-16 03:28:06] calls/s=0 switches/s=324 cpu=226.83% avg_sched=118.93us p50=4.10us p95=131.07us max=5415.07us errors=0
+[2026-04-16 03:28:08] calls/s=0 switches/s=282 cpu=173.22% avg_sched=63.96us p50=4.10us p95=65.54us max=5415.07us errors=0
+[2026-04-16 03:28:10] calls/s=2 switches/s=289 cpu=200.82% avg_sched=137.01us p50=4.10us p95=65.54us max=5415.07us errors=0
+[2026-04-16 03:28:12] calls/s=0 switches/s=305 cpu=199.22% avg_sched=116.52us p50=4.10us p95=131.07us max=5415.07us errors=0
+[2026-04-16 03:28:14] calls/s=0 switches/s=270 cpu=200.82% avg_sched=74.96us p50=4.10us p95=65.54us max=5459.43us errors=0
+[2026-04-16 03:28:16] calls/s=0 switches/s=279 cpu=199.22% avg_sched=65.13us p50=4.10us p95=65.54us max=5459.43us errors=0
+[2026-04-16 03:28:18] calls/s=0 switches/s=303 cpu=200.82% avg_sched=119.59us p50=4.10us p95=65.54us max=5961.47us errors=0

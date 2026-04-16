@@ -7,7 +7,7 @@
 
 #include "../common.h"
 
-char LICENSE[] SEC("license") = "Dual/GPL";
+char LICENSE[] SEC("license") = "GPL";
 
 const volatile __u32 target_tgid = 0;
 const volatile __u32 target_tid = 0;
@@ -97,9 +97,19 @@ static __always_inline struct thread_metrics *get_or_init_metrics(__u32 tid) {
 static __always_inline void bump_histogram(__u64 delta_ns) {
   __u32 slot = 0;
   __u64 *count;
+  __u64 v;
 
   if (delta_ns > 0) {
-    slot = 63 - __builtin_clzll(delta_ns);
+    /* Compute floor(log2(delta_ns)) using a loop instead of __builtin_clzll
+     * to avoid an LLVM BPF backend crash in DAG instruction selection. */
+    v = delta_ns;
+    #pragma unroll
+    for (int i = 0; i < 63; i++) {
+      v >>= 1;
+      if (v == 0)
+        break;
+      slot++;
+    }
     if (slot >= HIST_SLOTS) {
       slot = HIST_SLOTS - 1;
     }

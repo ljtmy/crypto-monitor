@@ -1,0 +1,21 @@
++DT:aes-256-cbc:15:16
++R:715517726:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:64
++R:200260837:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:256
++R:51935056:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:1024
++R:13146732:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:8192
++R:1622200:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:16384
++R:816647:aes-256-cbc:15.000000
+Forked child 0
+Got: +H:16:64:256:1024:8192:16384 from 0
+Got: +F:21:aes-256-cbc:763218907.73:854446237.87:886358289.07:897483571.20:885937493.33:891996296.53 from 0
+version: 3.0.2
+built on: Tue Aug 20 17:27:32 2024 UTC
+options: bn(64,64)
+compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -Wall -Wa,--noexecstack -g -O2 -ffile-prefix-map=/build/openssl-aGUoHt/openssl-3.0.2=. -flto=auto -ffat-lto-objects -flto=auto -ffat-lto-objects -fstack-protector-strong -Wformat -Werror=format-security -DOPENSSL_TLS_SECURITY_LEVEL=2 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_BUILDING_OPENSSL -DNDEBUG -Wdate-time -D_FORTIFY_SOURCE=2
+CPUINFO: OPENSSL_ia32cap=0xfffa3203078bffff:0x400604219c07ab
+aes-256-cbc     763218.91k   854446.24k   886358.29k   897483.57k   885937.49k   891996.30k
