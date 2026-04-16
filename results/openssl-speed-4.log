@@ -1,0 +1,66 @@
+Forked child 0
+Forked child 1
+Forked child 2
++DT:aes-256-cbc:15:16
++DT:aes-256-cbc:15:16
++DT:aes-256-cbc:15:16
++DT:aes-256-cbc:15:16
++R:276871433:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:64
++R:274046907:aes-256-cbc:15.010000
++DT:aes-256-cbc:15:64
++R:274635165:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:64
++R:272704561:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:64
++R:92591138:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:256
++R:92090860:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:256
++R:92841059:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:256
++R:92731039:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:256
++R:24620877:aes-256-cbc:15.010000
++DT:aes-256-cbc:15:1024
++R:24660973:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:1024
++R:24448479:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:1024
++R:24446385:aes-256-cbc:15.010000
++DT:aes-256-cbc:15:1024
++R:6082074:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:8192
++R:6098810:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:8192
++R:6135481:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:8192
++R:6139898:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:8192
++R:783676:aes-256-cbc:15.000000
++DT:aes-256-cbc:15:16384
++R:785487:aes-256-cbc:15.010000
++R:788187:aes-256-cbc:15.010000
++DT:aes-256-cbc:15:16384
++DT:aes-256-cbc:15:16384
++R:787186:aes-256-cbc:15.010000
++DT:aes-256-cbc:15:16384
++R:388777:aes-256-cbc:15.000000
++R:392153:aes-256-cbc:15.000000
++R:388589:aes-256-cbc:15.000000
++R:394642:aes-256-cbc:15.000000
+Forked child 3
+Got: +H:16:64:256:1024:8192:16384 from 0
+Got: +F:21:aes-256-cbc:295329528.53:395055522.13:419916356.56:415202918.40:430168414.66:424442811.73 from 0
+Got: +H:16:64:256:1024:8192:16384 from 1
+Got: +F:21:aes-256-cbc:290884865.07:395652433.07:416940343.77:419150370.13:429622099.40:431054301.87 from 1
+Got: +H:16:64:256:1024:8192:16384 from 2
+Got: +F:21:aes-256-cbc:292121952.83:396121851.73:417254041.60:418848836.27:427991586.13:424648157.87 from 2
+Got: +H:16:64:256:1024:8192:16384 from 3
+Got: +F:21:aes-256-cbc:292944176.00:392921002.67:420880605.87:416345429.33:428694837.04:428335650.13 from 3
+version: 3.0.2
+built on: Tue Aug 20 17:27:32 2024 UTC
+options: bn(64,64)
+compiler: gcc -fPIC -pthread -m64 -Wa,--noexecstack -Wall -Wa,--noexecstack -g -O2 -ffile-prefix-map=/build/openssl-aGUoHt/openssl-3.0.2=. -flto=auto -ffat-lto-objects -flto=auto -ffat-lto-objects -fstack-protector-strong -Wformat -Werror=format-security -DOPENSSL_TLS_SECURITY_LEVEL=2 -DOPENSSL_USE_NODELETE -DL_ENDIAN -DOPENSSL_PIC -DOPENSSL_BUILDING_OPENSSL -DNDEBUG -Wdate-time -D_FORTIFY_SOURCE=2
+CPUINFO: OPENSSL_ia32cap=0xfffa3203078bffff:0x400604219c07ab
+aes-256-cbc    1171280.52k  1579750.81k  1674991.35k  1669547.55k  1716476.94k  1708480.92k

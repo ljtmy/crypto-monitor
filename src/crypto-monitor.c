@@ -383,32 +383,60 @@ static int export_snapshot(const struct cli_options *opts,
   return write_json(opts->output_path, snap);
 }
 
+// 解析 ELF 共享库中指定符号的偏移地址，用于 uprobe 挂载
+static long resolve_symbol_offset(const char *binary_path, const char *symbol) {
+  char cmd[512];
+  char line[256];
+  FILE *fp;
+  long offset = -1;
+
+  /* Use grep with word boundary before symbol and allow optional version
+   * suffix like @@OPENSSL_3.0.0 after the symbol name. */
+  snprintf(cmd, sizeof(cmd),
+           "nm -D '%s' 2>/dev/null | grep -E ' T %s(@@|$)'",
+           binary_path, symbol);
+  fp = popen(cmd, "r");
+  if (!fp) {
+    return -1;
+  }
+  if (fgets(line, sizeof(line), fp)) {
+    offset = strtol(line, NULL, 16);
+  }
+  pclose(fp);
+  return offset;
+}
+
 // 【高级应用】动态挂载用户态探针 (Uprobe)
 // 完美解决了 "Uprobe 不能在 eBPF 源码里写死绝对路径" 的工程难题
 static int attach_uprobes(struct crypto_monitor_bpf *skel,
                           const struct cli_options *opts) {
-  // 配置入口探针的目标符号名 (例如 EVP_CipherUpdate 或 SDF_Encrypt)
-  LIBBPF_OPTS(bpf_uprobe_opts, enter_opts, .func_name = opts->symbol);
-  
-  // 对于出口探针，必须将 retprobe 设置为 true，告诉内核这是一个 uretprobe
-  LIBBPF_OPTS(bpf_uprobe_opts, exit_opts, .func_name = opts->symbol,
-              .retprobe = true);
+  long sym_offset;
 
-  // 在运行时动态执行挂载：
-  // opts->pid 决定了是只监控某个特定进程，还是监控全系统 (-1)
-  // opts->binary_path 就是你在命令行传进来的库文件绝对路径
+  /* Attach uprobe system-wide (pid=-1) so that child processes forked by
+   * 'openssl speed -multi N' are also traced.  The BPF-side target_tgid
+   * filter ensures only events from the target process group are recorded. */
+
+  sym_offset = resolve_symbol_offset(opts->binary_path, opts->symbol);
+  if (sym_offset < 0) {
+    fprintf(stderr, "failed to resolve symbol '%s' in '%s'\n",
+            opts->symbol, opts->binary_path);
+    return -1;
+  }
+
+  // 挂载入口探针 (uprobe)
   skel->links.handle_crypto_enter =
-      bpf_program__attach_uprobe_opts(skel->progs.handle_crypto_enter,
-                                      opts->pid ? opts->pid : -1,
-                                      opts->binary_path, 0, &enter_opts);
+      bpf_program__attach_uprobe(skel->progs.handle_crypto_enter,
+                                 false, -1,
+                                 opts->binary_path, (size_t)sym_offset);
   if (libbpf_get_error(skel->links.handle_crypto_enter)) {
     return (int)-libbpf_get_error(skel->links.handle_crypto_enter);
   }
 
+  // 挂载出口探针 (uretprobe)
   skel->links.handle_crypto_exit =
-      bpf_program__attach_uprobe_opts(skel->progs.handle_crypto_exit,
-                                      opts->pid ? opts->pid : -1,
-                                      opts->binary_path, 0, &exit_opts);
+      bpf_program__attach_uprobe(skel->progs.handle_crypto_exit,
+                                 true, -1,
+                                 opts->binary_path, (size_t)sym_offset);
   if (libbpf_get_error(skel->links.handle_crypto_exit)) {
     return (int)-libbpf_get_error(skel->links.handle_crypto_exit);
   }
